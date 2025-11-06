@@ -8,7 +8,7 @@ import {
   LuMapPin,
   LuPhone,
 } from 'react-icons/lu';
-import logo from '../../logo.svg';
+import logo from '../../assets/logo.jpg';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();

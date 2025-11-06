@@ -10,7 +10,7 @@ import {
   LuMoon,
   LuLogOut,
 } from 'react-icons/lu';
-import logo from '../../logo.svg';
+import logo from '../../assets/logo.jpg';
 import { ThemeContext } from '../../context/ThemeContext';
 import { AuthContext } from '../../context/AuthContext';
 
