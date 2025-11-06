@@ -127,40 +127,42 @@ function App() {
                         notification={notification}
                         handleCloseNotification={handleCloseNotification}
                     />
-                    <Routes>
-                        <Route path="/" element={<Landing imageUrl="https://comunidadescolar.com.bo/wp-content/uploads/2019/02/Tejidos.jpg" />} />
-                        <Route path="/catalog" element={<Catalog onAddToCart={handleAddToCart} />} />
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/register" element={<Register />} />
-                        <Route path="/admin" element={<AdminPage />} />
-                        <Route
-                            path="/profile"
-                            element={
-                                <PrivateRoute>
-                                    <Profile />
-                                </PrivateRoute>
-                            }
-                        />
-                        <Route
-                            path="/cart"
-                            element={
-                                <ShoppingCart
-                                    cartItems={cartItems}
-                                    onRemoveFromCart={handleRemoveFromCart}
-                                    onUpdateQuantity={handleUpdateQuantity}
-                                    onCheckout={handleCreateOrder}
-                                />
-                            }
-                        />
-                        <Route
-                            path="/checkout"
-                            element={
-                                <PrivateRoute>
-                                    <Checkout cartItems={cartItems} orderDetails={orderDetails} orderError={orderError} />
-                                </PrivateRoute>
-                            }
-                        />
-                    </Routes>
+                    <main className="flex-1 bg-background">
+                        <Routes>
+                            <Route path="/" element={<Landing />} />
+                            <Route path="/catalog" element={<Catalog onAddToCart={handleAddToCart} />} />
+                            <Route path="/login" element={<Login />} />
+                            <Route path="/register" element={<Register />} />
+                            <Route path="/admin" element={<AdminPage />} />
+                            <Route
+                                path="/profile"
+                                element={
+                                    <PrivateRoute>
+                                        <Profile />
+                                    </PrivateRoute>
+                                }
+                            />
+                            <Route
+                                path="/cart"
+                                element={
+                                    <ShoppingCart
+                                        cartItems={cartItems}
+                                        onRemoveFromCart={handleRemoveFromCart}
+                                        onUpdateQuantity={handleUpdateQuantity}
+                                        onCheckout={handleCreateOrder}
+                                    />
+                                }
+                            />
+                            <Route
+                                path="/checkout"
+                                element={
+                                    <PrivateRoute>
+                                        <Checkout cartItems={cartItems} orderDetails={orderDetails} orderError={orderError} />
+                                    </PrivateRoute>
+                                }
+                            />
+                        </Routes>
+                    </main>
                 </div>
                 <Footer />
             </div>

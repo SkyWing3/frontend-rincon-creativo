@@ -1,6 +1,5 @@
 import React, { useEffect, useContext } from 'react';
 import Navbar from './components/Navbar/Navbar';
-import Footer from './components/Footer/Footer';
 import Notification from './components/Notification/Notification';
 import { ThemeContext } from './context/ThemeContext';
 import './App.css';
@@ -9,15 +8,16 @@ function Main({cartItems, notification, handleCloseNotification}) {
   const { isDarkMode } = useContext(ThemeContext);
 
   useEffect(() => {
+    const classTarget = document.documentElement;
     if (isDarkMode) {
-      document.body.classList.add('dark-mode');
+      classTarget.classList.add('dark');
     } else {
-      document.body.classList.remove('dark-mode');
+      classTarget.classList.remove('dark');
     }
   }, [isDarkMode]);
 
   return (
-    <div className={`App ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+    <div className="flex flex-col bg-background text-foreground transition-colors duration-300">
         <Navbar cartItemCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)} />
         {notification && (
         <Notification
@@ -26,7 +26,6 @@ function Main({cartItems, notification, handleCloseNotification}) {
             onClose={handleCloseNotification}
         />
         )}
-        {/* <Footer /> */}
     </div>
   );
 }

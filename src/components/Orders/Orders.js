@@ -1,16 +1,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
-import './Orders.css';
+import { LuChevronRight, LuPackage, LuX } from 'react-icons/lu';
 import OrderDetail from '../OrderDetail/OrderDetail';
-
-const STATUS_CLASS_MAP = {
-  delivered: 'status-completed',
-  completed: 'status-completed',
-  pending: 'status-pending',
-  processing: 'status-pending',
-  cancelled: 'status-cancelled',
-  canceled: 'status-cancelled',
-};
 
 const translateStatus = (status) => {
   if (!status) {
@@ -63,9 +54,17 @@ const formatDate = (isoString) => {
   });
 };
 
+const STATUS_STYLES = {
+  delivered: 'bg-emerald-500/10 text-emerald-600',
+  completed: 'bg-emerald-500/10 text-emerald-600',
+  pending: 'bg-amber-500/10 text-amber-600',
+  processing: 'bg-amber-500/10 text-amber-600',
+  cancelled: 'bg-rose-500/10 text-rose-600',
+  canceled: 'bg-rose-500/10 text-rose-600',
+};
+
 const Orders = ({ show, onClose, orders = [] }) => {
   const [selectedOrder, setSelectedOrder] = useState(null);
-
   const safeOrders = useMemo(() => (Array.isArray(orders) ? orders : []), [orders]);
 
   useEffect(() => {
@@ -77,15 +76,6 @@ const Orders = ({ show, onClose, orders = [] }) => {
   useEffect(() => {
     setSelectedOrder(null);
   }, [safeOrders]);
-
-  const getStatusClass = (status) => {
-    if (!status) {
-      return '';
-    }
-
-    const normalized = status.toLowerCase();
-    return STATUS_CLASS_MAP[normalized] || '';
-  };
 
   if (!show) {
     return null;
@@ -99,38 +89,77 @@ const Orders = ({ show, onClose, orders = [] }) => {
     setSelectedOrder(null);
   };
 
+  const renderStatusBadge = (status) => {
+    if (!status) {
+      return <span className="rounded-full bg-muted/60 px-3 py-1 text-xs font-semibold text-muted-foreground">Desconocido</span>;
+    }
+    const normalized = status.toLowerCase();
+    const style = STATUS_STYLES[normalized] || 'bg-muted/60 text-muted-foreground';
+    return (
+      <span className={`rounded-full px-3 py-1 text-xs font-semibold ${style}`}>
+        {translateStatus(status)}
+      </span>
+    );
+  };
+
   return (
-    <div className="orders-modal">
-      <div className="orders-container">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur">
+      <div className="relative w-full max-w-4xl rounded-3xl border border-border/60 bg-card/98 p-6 shadow-xl">
+        <div className="flex items-center justify-between border-b border-border/60 pb-4">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <LuPackage className="h-5 w-5" />
+            </span>
+            <div>
+              <h2 className="text-xl font-semibold text-foreground">Mis pedidos</h2>
+              <p className="text-sm text-muted-foreground">
+                {safeOrders.length === 0 ? 'Aún no realizaste compras' : `Historial de ${safeOrders.length} pedidos`}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-border/70 text-muted-foreground transition hover:border-accent/40 hover:text-accent"
+            aria-label="Cerrar"
+          >
+            <LuX className="h-5 w-5" />
+          </button>
+        </div>
+
         {selectedOrder ? (
           <OrderDetail order={selectedOrder} onBack={handleBack} />
         ) : (
-          <>
-            <div className="orders-header">
-              <h1>Mis Pedidos</h1>
-              <button onClick={onClose} className="close-btn">×</button>
-            </div>
+          <div className="mt-6 max-h-[60vh] overflow-y-auto pr-2">
             {safeOrders.length === 0 ? (
-              <div className="orders-list">
-                <p className="orders-empty">No tienes pedidos registrados todavía.</p>
+              <div className="rounded-3xl border border-border/60 bg-muted/30 px-6 py-10 text-center text-muted-foreground">
+                No tienes pedidos registrados todavía.
               </div>
             ) : (
-              <div className="orders-list">
-                {safeOrders.map(order => (
-                  <div key={order.id} className="order-item" onClick={() => handleOrderClick(order)} style={{cursor: 'pointer'}}>
-                    <div className="order-details">
-                      <span>Pedido #{order.id}</span>
-                      <p>Fecha: {formatDate(order.created_at)}</p>
-                      <p>Total: {formatCurrency(order.total_amount)}</p>
+              <div className="space-y-4">
+                {safeOrders.map((order) => (
+                  <button
+                    key={order.id}
+                    type="button"
+                    onClick={() => handleOrderClick(order)}
+                    className="flex w-full items-center justify-between gap-4 rounded-3xl border border-border/60 bg-card/95 px-5 py-4 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-soft"
+                  >
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold text-foreground">
+                        Pedido #{order.id}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Fecha: {formatDate(order.created_at)}</p>
+                      <p className="text-xs text-muted-foreground">Total: {formatCurrency(order.total_amount)}</p>
                     </div>
-                    <div className={`order-status ${getStatusClass(order.state)}`}>
-                      {translateStatus(order.state)}
+                    <div className="flex items-center gap-3">
+                      {renderStatusBadge(order.state)}
+                      <LuChevronRight className="h-5 w-5 text-muted-foreground" />
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
     </div>

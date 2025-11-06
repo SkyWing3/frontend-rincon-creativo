@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
-import './Checkout.css';
+import { LuClipboardList, LuExternalLink } from 'react-icons/lu';
 import { AuthContext } from '../../context/AuthContext';
 import authService from '../../services/authService';
 
@@ -55,9 +55,13 @@ const Checkout = ({ cartItems = [], orderDetails = null, orderError = null }) =>
 
     if (!token) {
         return (
-            <div className="checkout-container">
-                <h2>Finalizar Compra</h2>
-                <p>Debes iniciar sesión para finalizar la compra.</p>
+            <div className="bg-background py-16 text-foreground">
+                <div className="container rounded-3xl border border-border/60 bg-card/95 p-12 text-center shadow-soft">
+                    <h2 className="text-3xl font-semibold">Finalizar compra</h2>
+                    <p className="mt-4 text-sm text-muted-foreground">
+                        Debes iniciar sesión para finalizar la compra.
+                    </p>
+                </div>
             </div>
         );
     }
@@ -66,111 +70,178 @@ const Checkout = ({ cartItems = [], orderDetails = null, orderError = null }) =>
     const paymentInstructions = orderDetails?.payment_instructions;
 
     return (
-        <div className="checkout-container">
-            <h2>Finalizar Compra</h2>
-            <div className="checkout-content">
-                <div className="user-data">
-                    <h3>Datos de la Cuenta</h3>
-                    {isLoadingProfile && <p className="checkout-status">Cargando datos del perfil...</p>}
-                    {profileError && !isLoadingProfile && (
-                        <p className="checkout-error">{profileError}</p>
-                    )}
-                    {!isLoadingProfile && !profileError && profile && (
-                        <>
-                            <p>
-                                <strong>Nombre:</strong> {profile.first_name || 'N/D'}
-                            </p>
-                            <p>
-                                <strong>Apellido paterno:</strong> {profile.f_last_name || 'N/D'}
-                            </p>
-                            <p>
-                                <strong>Apellido materno:</strong> {profile.s_last_name || 'N/D'}
-                            </p>
-                            <p>
-                                <strong>Correo electrónico:</strong> {profile.email || 'N/D'}
-                            </p>
-                            <p>
-                                <strong>Teléfono:</strong> {profile.phone || 'N/D'}
-                            </p>
-                            <p>
-                                <strong>Departamento:</strong> {profile.departamento || 'N/D'}
-                            </p>
-                            <p>
-                                <strong>Ciudad:</strong> {profile.city || 'N/D'}
-                            </p>
-                            <p>
-                                <strong>Dirección:</strong> {profile.address || 'N/D'}
-                            </p>
-                        </>
-                    )}
-                    {!isLoadingProfile && !profileError && !profile && (
-                        <p className="checkout-status">
-                            No se encontraron datos del perfil. Intenta nuevamente más tarde.
-                        </p>
-                    )}
+        <div className="bg-background py-16 text-foreground">
+            <div className="container space-y-10">
+                <div className="flex flex-col gap-3">
+                    <span className="inline-flex w-fit items-center gap-2 rounded-full bg-secondary/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-secondary">
+                        <LuClipboardList className="h-4 w-4" />
+                        Confirmación
+                    </span>
+                    <h1 className="text-3xl font-semibold md:text-4xl">Finalizar compra</h1>
+                    <p className="max-w-2xl text-sm text-muted-foreground md:text-base">
+                        Revisa tus datos personales y el resumen del pedido. Si ya generaste la orden, encontrarás las
+                        instrucciones de pago a continuación.
+                    </p>
                 </div>
 
-                <div className="cart-summary">
-                    <h3>Resumen del Carrito</h3>
-                    {!hasItems && (
-                        <p className="checkout-status">
-                            Aún no tienes productos en tu carrito. Agrega artículos en el catálogo para continuar.
-                        </p>
-                    )}
-                    {hasItems &&
-                        cartItems.map((item) => {
-                            const subtotal = Number(item.price || 0) * (item.quantity || 0);
-                            return (
-                                <div key={item.id} className="cart-item-summary">
-                                    <span>
-                                        {item.name} (x{item.quantity})
-                                    </span>
-                                    <span>Bs {subtotal.toFixed(2)}</span>
+                <div className="grid gap-8 lg:grid-cols-[3fr_2fr]">
+                    <section className="space-y-6 rounded-3xl border border-border/60 bg-card/95 p-8 shadow-soft">
+                        <header className="flex flex-col gap-2 border-b border-border/50 pb-4">
+                            <h2 className="text-xl font-semibold">Datos de la cuenta</h2>
+                            <p className="text-sm text-muted-foreground">
+                                Verifica que tu información esté actualizada para coordinar envíos y seguimiento.
+                            </p>
+                        </header>
+
+                        {isLoadingProfile && (
+                            <p className="rounded-2xl border border-border/60 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+                                Cargando datos del perfil...
+                            </p>
+                        )}
+
+                        {profileError && !isLoadingProfile && (
+                            <p className="rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm text-accent">
+                                {profileError}
+                            </p>
+                        )}
+
+                        {!isLoadingProfile && !profileError && profile && (
+                            <dl className="grid gap-4 md:grid-cols-2">
+                                <div>
+                                    <dt className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Nombre</dt>
+                                    <dd className="text-sm font-medium">{profile.first_name || 'N/D'}</dd>
                                 </div>
-                            );
-                        })}
-                    {hasItems && (
-                        <div className="cart-total-summary">
-                            <strong>Total:</strong>
-                            <span>Bs {cartTotal.toFixed(2)}</span>
-                        </div>
-                    )}
-                    {orderError && <p className="checkout-error">{orderError}</p>}
-                    {!hasOrder && !orderError && (
-                        <p className="checkout-status">
-                            Genera una orden desde el carrito para ver las instrucciones de pago.
-                        </p>
-                    )}
-                    {hasOrder && (
-                        <>
-                            {paymentInstructions && (
-                                <div className="payment-instructions">
-                                    <h4>Instrucciones de Pago</h4>
-                                    <p>
-                                        <strong>Activo:</strong> {paymentInstructions.asset}
-                                    </p>
-                                    <p>
-                                        <strong>Monto a pagar:</strong> {paymentInstructions.usdt_amount} {paymentInstructions.asset}
-                                    </p>
-                                    <p>
-                                        <strong>Red:</strong> {paymentInstructions.network}
-                                    </p>
-                                    <p>
-                                        <strong>Dirección:</strong> {paymentInstructions.usdt_address}
-                                    </p>
-                                    <p className="payment-note">{paymentInstructions.note}</p>
-                                    <a
-                                        className="binance-link"
-                                        href="https://www.binance.com"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        Ir a Binance Pay
-                                    </a>
+                                <div>
+                                    <dt className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Apellido paterno</dt>
+                                    <dd className="text-sm font-medium">{profile.f_last_name || 'N/D'}</dd>
                                 </div>
-                            )}
-                        </>
-                    )}
+                                <div>
+                                    <dt className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Apellido materno</dt>
+                                    <dd className="text-sm font-medium">{profile.s_last_name || 'N/D'}</dd>
+                                </div>
+                                <div>
+                                    <dt className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Correo electrónico</dt>
+                                    <dd className="text-sm font-medium">{profile.email || 'N/D'}</dd>
+                                </div>
+                                <div>
+                                    <dt className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Teléfono</dt>
+                                    <dd className="text-sm font-medium">{profile.phone || 'N/D'}</dd>
+                                </div>
+                                <div>
+                                    <dt className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Departamento</dt>
+                                    <dd className="text-sm font-medium">{profile.departamento || 'N/D'}</dd>
+                                </div>
+                                <div>
+                                    <dt className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Ciudad</dt>
+                                    <dd className="text-sm font-medium">{profile.city || 'N/D'}</dd>
+                                </div>
+                                <div className="md:col-span-2">
+                                    <dt className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Dirección</dt>
+                                    <dd className="text-sm font-medium">{profile.address || 'N/D'}</dd>
+                                </div>
+                            </dl>
+                        )}
+
+                        {!isLoadingProfile && !profileError && !profile && (
+                            <p className="rounded-2xl border border-border/60 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+                                No se encontraron datos del perfil. Intenta nuevamente más tarde.
+                            </p>
+                        )}
+                    </section>
+
+                    <aside className="space-y-6 rounded-3xl border border-border/60 bg-card/95 p-8 shadow-soft">
+                        <header className="flex flex-col gap-2 border-b border-border/50 pb-4">
+                            <h2 className="text-xl font-semibold">Resumen del pedido</h2>
+                            <p className="text-sm text-muted-foreground">
+                                Confirmación de los productos y total estimado.
+                            </p>
+                        </header>
+
+                        {!hasItems && (
+                            <p className="rounded-2xl border border-border/60 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+                                Aún no tienes productos en tu carrito. Agrega artículos en el catálogo para continuar.
+                            </p>
+                        )}
+
+                        {hasItems && (
+                            <div className="space-y-4">
+                                {cartItems.map((item) => {
+                                    const subtotal = Number(item.price || 0) * (item.quantity || 0);
+                                    return (
+                                        <div key={item.id} className="flex items-start justify-between gap-4 rounded-2xl border border-border/40 bg-card px-4 py-3">
+                                            <div>
+                                                <p className="text-sm font-medium text-foreground">
+                                                    {item.name} <span className="text-muted-foreground">(x{item.quantity})</span>
+                                                </p>
+                                                {item.categoryName && (
+                                                    <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                                                        {item.categoryName}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <span className="text-sm font-semibold text-primary">Bs {subtotal.toFixed(2)}</span>
+                                        </div>
+                                    );
+                                })}
+                                <div className="flex items-center justify-between rounded-2xl bg-primary/10 px-4 py-3 text-sm font-semibold text-primary">
+                                    <span>Total estimado</span>
+                                    <span>Bs {cartTotal.toFixed(2)}</span>
+                                </div>
+                            </div>
+                        )}
+
+                        {orderError && (
+                            <p className="rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm text-accent">
+                                {orderError}
+                            </p>
+                        )}
+
+                        {!hasOrder && !orderError && (
+                            <p className="rounded-2xl border border-border/60 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+                                Genera una orden desde el carrito para ver las instrucciones de pago.
+                            </p>
+                        )}
+
+                        {hasOrder && paymentInstructions && (
+                            <div className="space-y-4 rounded-3xl border border-primary/40 bg-primary/10 p-6 text-primary">
+                                <h3 className="text-lg font-semibold">Instrucciones de pago</h3>
+                                <dl className="space-y-2 text-sm">
+                                    <div className="flex items-center justify-between">
+                                        <dt>Activo</dt>
+                                        <dd className="font-semibold">{paymentInstructions.asset}</dd>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <dt>Monto a pagar</dt>
+                                        <dd className="font-semibold">
+                                            {paymentInstructions.usdt_amount} {paymentInstructions.asset}
+                                        </dd>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <dt>Red</dt>
+                                        <dd className="font-semibold">{paymentInstructions.network}</dd>
+                                    </div>
+                                    <div className="flex flex-col gap-1">
+                                        <dt>Dirección</dt>
+                                        <dd className="font-mono text-xs">{paymentInstructions.usdt_address}</dd>
+                                    </div>
+                                </dl>
+                                {paymentInstructions.note && (
+                                    <p className="rounded-2xl border border-primary/50 bg-primary/15 px-4 py-3 text-xs">
+                                        {paymentInstructions.note}
+                                    </p>
+                                )}
+                                <a
+                                    className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-soft transition hover:bg-primary/90"
+                                    href="https://www.binance.com"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Ir a Binance Pay
+                                    <LuExternalLink className="h-4 w-4" />
+                                </a>
+                            </div>
+                        )}
+                    </aside>
                 </div>
             </div>
         </div>

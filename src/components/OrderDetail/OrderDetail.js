@@ -1,5 +1,5 @@
 import React from 'react';
-import './OrderDetail.css';
+import { LuArrowLeft, LuPackageCheck } from 'react-icons/lu';
 
 const formatCurrency = (amount) => {
   if (amount === null || amount === undefined) {
@@ -62,53 +62,113 @@ const OrderDetail = ({ order, onBack }) => {
   const orderDetails = Array.isArray(order.details) ? order.details : [];
 
   return (
-    <div className="order-detail-container">
-      <div className="order-detail-header">
-        <h2>Detalle del Pedido {order.id}</h2>
-        <button onClick={onBack} className="back-btn">Volver a la lista</button>
+    <div className="mt-6 space-y-6">
+      <button
+        type="button"
+        onClick={onBack}
+        className="inline-flex items-center gap-2 rounded-full border border-border/70 px-4 py-2 text-sm font-medium text-muted-foreground transition hover:border-primary/40 hover:text-primary"
+      >
+        <LuArrowLeft className="h-4 w-4" />
+        Volver a la lista
+      </button>
+
+      <div className="rounded-3xl border border-border/60 bg-muted/20 p-6">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <LuPackageCheck className="h-5 w-5" />
+          </span>
+          <div>
+            <h3 className="text-lg font-semibold text-foreground">Pedido #{order.id}</h3>
+            <p className="text-sm text-muted-foreground">Detalles completos de la compra</p>
+          </div>
+        </div>
+        <dl className="mt-4 grid gap-3 text-sm text-muted-foreground md:grid-cols-2">
+          <div>
+            <dt className="text-xs uppercase tracking-[0.3em]">Fecha</dt>
+            <dd className="font-medium text-foreground">{formatDate(order.created_at)}</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase tracking-[0.3em]">Total</dt>
+            <dd className="font-medium text-primary">{formatCurrency(order.total_amount)}</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase tracking-[0.3em]">Estado</dt>
+            <dd className="font-medium text-foreground">{translateStatus(order.state)}</dd>
+          </div>
+          {order.global_discount !== undefined && order.global_discount !== null && (
+            <div>
+              <dt className="text-xs uppercase tracking-[0.3em]">Descuento global</dt>
+              <dd className="font-medium text-foreground">{order.global_discount}%</dd>
+            </div>
+          )}
+        </dl>
       </div>
-      <div className="order-summary">
-        <p><strong>Fecha:</strong> {formatDate(order.created_at)}</p>
-        <p><strong>Total:</strong> {formatCurrency(order.total_amount)}</p>
-        <p><strong>Estado:</strong> {translateStatus(order.state)}</p>
-        {order.global_discount !== undefined && order.global_discount !== null && (
-          <p><strong>Descuento global:</strong> {order.global_discount}%</p>
-        )}
-      </div>
-      <div className="product-list">
-        <h3>Productos</h3>
+
+      <div className="space-y-4 rounded-3xl border border-border/60 bg-card/95 p-6">
+        <h3 className="text-lg font-semibold text-foreground">Productos</h3>
         {orderDetails.length === 0 ? (
-          <p>No se registraron productos para este pedido.</p>
+          <p className="rounded-2xl border border-border/60 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+            No se registraron productos para este pedido.
+          </p>
         ) : (
-          orderDetails.map(detail => {
-            const subtotal = detail.subtotal_price !== undefined ? parseFloat(detail.subtotal_price) : null;
-            const quantity = detail.quantity ?? 0;
-            const unitPrice = detail.product?.price !== undefined && detail.product?.price !== null
-              ? detail.product.price
-              : (quantity > 0 && subtotal !== null && !Number.isNaN(subtotal) ? subtotal / quantity : null);
+          <div className="space-y-4">
+            {orderDetails.map((detail) => {
+              const subtotal =
+                detail.subtotal_price !== undefined ? parseFloat(detail.subtotal_price) : null;
+              const quantity = detail.quantity ?? 0;
+              const unitPrice =
+                detail.product?.price !== undefined && detail.product?.price !== null
+                  ? detail.product.price
+                  : quantity > 0 && subtotal !== null && !Number.isNaN(subtotal)
+                    ? subtotal / quantity
+                    : null;
 
-            const productName = detail.product?.name || `Producto #${detail.product_id}`;
-            const productImage = detail.product?.image || DEFAULT_PRODUCT_IMAGE;
+              const productName = detail.product?.name || `Producto #${detail.product_id}`;
+              const productImage = detail.product?.image || DEFAULT_PRODUCT_IMAGE;
 
-            return (
-              <div key={detail.id} className="product-item">
-                <div className="product-info">
-                  <img src={productImage} alt={productName} className="product-image" />
-                  <div className="product-details">
-                    <span>{productName}</span>
-                    <p>Precio unitario: {unitPrice !== null && !Number.isNaN(unitPrice) ? formatCurrency(unitPrice) : 'No disponible'}</p>
+              return (
+                <div
+                  key={detail.id}
+                  className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-card px-4 py-3 md:flex-row md:items-center md:justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-16 w-16 overflow-hidden rounded-2xl border border-border/60 bg-muted/30">
+                      <img src={productImage} alt={productName} className="h-full w-full object-cover" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">{productName}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Precio unitario:{' '}
+                        {unitPrice !== null && !Number.isNaN(unitPrice)
+                          ? formatCurrency(unitPrice)
+                          : 'No disponible'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.3em]">Cantidad</p>
+                      <p className="font-medium text-foreground">{quantity}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.3em]">Subtotal</p>
+                      <p className="font-medium text-primary">
+                        {subtotal !== null && !Number.isNaN(subtotal)
+                          ? formatCurrency(subtotal)
+                          : 'No disponible'}
+                      </p>
+                    </div>
+                    {detail.unit_discount ? (
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.3em]">Desc. unitario</p>
+                        <p className="font-medium text-foreground">{detail.unit_discount}%</p>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
-                <div className="product-quantity">
-                  <p>Cantidad: {quantity}</p>
-                </div>
-                <div className="product-price">
-                  <p>Subtotal: {subtotal !== null && !Number.isNaN(subtotal) ? formatCurrency(subtotal) : 'No disponible'}</p>
-                  {detail.unit_discount ? <p>Descuento unitario: {detail.unit_discount}%</p> : null}
-                </div>
-              </div>
-            );
-          })
+              );
+            })}
+          </div>
         )}
       </div>
     </div>
